@@ -31,13 +31,10 @@ def check_email(mail, logging: bool = False):
         id_list = []
 
         for i in req:
-            for k, v in i.items():
-                if k == "id":
-                    id_list.append(v)
-
-        x = "mails" if length > 1 else "mail"
-
+            id_list.extend(v for k, v in i.items() if k == "id")
         if logging:
+            x = "mails" if length > 1 else "mail"
+
             print(
                 f"Mailbox has {length} {x}. (Mailbox is refreshed automatically every 5 seconds.)"
             )
@@ -49,13 +46,13 @@ def check_email(mail, logging: bool = False):
             req = req.json()
 
             for k, v in req.items():
-                if k == "from":
-                    sender = v
-                if k == "subject":
-                    subject = v
                 if k == "date":
                     date = v
-                if k == "textBody":
+                elif k == "from":
+                    sender = v
+                elif k == "subject":
+                    subject = v
+                elif k == "textBody":
                     content = v
 
             if logging:
@@ -98,32 +95,21 @@ def create_email(custom_domain: bool = False, logging: bool = False):
             )
 
             newMail = f"https://www.1secmail.com/api/v1/?login={custom_domain}&domain={domain}"
-            reqMail = requests.get(newMail)
-            reqMail.encoding = reqMail.apparent_encoding
-
-            username = re.search(r"login=(.*)&", newMail).group(1)
-            domain = re.search(r"domain=(.*)", newMail).group(1)
-            mail = f"{username}@{domain}"
-
-            if logging:
-                print("\nYour temporary email was created successfully:", mail)
-            return mail
-
         else:
             name = string.ascii_lowercase + string.digits
-            random_username = "".join(random.choice(name) for i in range(10))
+            random_username = "".join(random.choice(name) for _ in range(10))
             newMail = f"https://www.1secmail.com/api/v1/?login={random_username}&domain={domain}"
 
-            reqMail = requests.get(newMail)
-            reqMail.encoding = reqMail.apparent_encoding
+        reqMail = requests.get(newMail)
+        reqMail.encoding = reqMail.apparent_encoding
 
-            username = re.search(r"login=(.*)&", newMail).group(1)
-            domain = re.search(r"domain=(.*)", newMail).group(1)
-            mail = f"{username}@{domain}"
+        username = re.search(r"login=(.*)&", newMail)[1]
+        domain = re.search(r"domain=(.*)", newMail)[1]
+        mail = f"{username}@{domain}"
 
-            if logging:
-                print("\nYour temporary email was created successfully:", mail)
-            return mail
+        if logging:
+            print("\nYour temporary email was created successfully:", mail)
+        return mail
 
     except KeyboardInterrupt:
         requests.post(

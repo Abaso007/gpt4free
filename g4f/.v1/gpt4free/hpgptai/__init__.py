@@ -29,7 +29,11 @@ class ChatCompletion:
             "Content-Type": "application/json",
             "X-Wp-Nonce": restNonce
         }
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else None
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else None
+        )
         data = {
             "env": "chatbot",
             "session": "N/A",
@@ -50,9 +54,7 @@ class ChatCompletion:
             "clientId": ChatCompletion.randomStr(),
         }
         res = requests.post(url=url, data=json.dumps(data), headers=headers, proxies=proxies)
-        if res.status_code == 200:
-            return res.json()
-        return res.text
+        return res.json() if res.status_code == 200 else res.text
 
     @staticmethod
     def randomStr():
@@ -64,8 +66,7 @@ class ChatCompletion:
         message = message[-last:]
         if isCasuallyFineTuned:
             lastLine = message[-1]
-            prompt = lastLine.content + ""
-            return prompt
+            return f"{lastLine.content}"
         conversation = [x["who"] + x["content"] for x in message]
         prompt += '\n'.join(conversation)
         prompt += '\n' + "AI: "
@@ -78,14 +79,18 @@ class ChatCompletion:
             "Referer": "https://chatgptlogin.ac/",
             "User-Agent": UserAgent().random
         }
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else None
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else None
+        )
         res = requests.get(url, headers=headers, proxies=proxies)
         src = re.search(
             'class="mwai-chat mwai-chatgpt">.*<span>Send</span></button></div></div></div> <script defer src="(.*?)">',
-            res.text).group(1)
+            res.text,
+        )[1]
         decoded_string = base64.b64decode(src.split(",")[-1]).decode('utf-8')
-        restNonce = re.search(r"let restNonce = '(.*?)';", decoded_string).group(1)
-        return restNonce
+        return re.search(r"let restNonce = '(.*?)';", decoded_string)[1]
 
 
 class Completion:

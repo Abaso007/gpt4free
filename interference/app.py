@@ -15,10 +15,10 @@ def chat_completions():
     streaming = request.json.get('stream', False)
     model = request.json.get('model', 'gpt-3.5-turbo')
     messages = request.json.get('messages')
-    
+
     response = ChatCompletion.create(model=model, stream=streaming,
                                      messages=messages)
-    
+
     if not streaming:
         while 'curl_cffi.requests.errors.RequestsError' in response:
             response = ChatCompletion.create(model=model, stream=streaming,
@@ -29,23 +29,22 @@ def chat_completions():
             'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=28))
 
         return {
-            'id': 'chatcmpl-%s' % completion_id,
+            'id': f'chatcmpl-{completion_id}',
             'object': 'chat.completion',
             'created': completion_timestamp,
             'model': model,
             'usage': {
                 'prompt_tokens': None,
                 'completion_tokens': None,
-                'total_tokens': None
+                'total_tokens': None,
             },
-            'choices': [{
-                'message': {
-                    'role': 'assistant',
-                    'content': response
-                },
-                'finish_reason': 'stop',
-                'index': 0
-            }]
+            'choices': [
+                {
+                    'message': {'role': 'assistant', 'content': response},
+                    'finish_reason': 'stop',
+                    'index': 0,
+                }
+            ],
         }
 
     def stream():

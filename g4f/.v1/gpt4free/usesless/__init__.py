@@ -26,7 +26,7 @@ class Account:
             return
 
         name = string.ascii_lowercase + string.digits
-        username = "".join(random.choice(name) for i in range(20))
+        username = "".join(random.choice(name) for _ in range(20))
 
         pwo = PasswordGenerator()
         pwo.minlen = 8
@@ -141,8 +141,7 @@ class Completion:
         request.encoding = request.apparent_encoding
         content = request.content
 
-        response = Completion.__response_to_json(content)
-        return response
+        return Completion.__response_to_json(content)
 
 
     @classmethod
@@ -150,9 +149,5 @@ class Completion:
         text = str(text.decode("utf-8"))
 
         split_text = text.rsplit("\n", 1)
-        if len(split_text) > 1:
-            to_json = json.loads(split_text[1])
-            return to_json
-        else:
-            return None
+        return json.loads(split_text[1]) if len(split_text) > 1 else None
 

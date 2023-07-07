@@ -22,7 +22,11 @@ class ChatCompletion:
             "Referer": "https://chat.getgpt.world/",
                'user-agent': UserAgent().random,
         }
-        proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy} if proxy else None
+        proxies = (
+            {'http': f'http://{proxy}', 'https': f'http://{proxy}'}
+            if proxy
+            else None
+        )
         data = json.dumps({
             "messages": messages,
             "frequency_penalty": 0,
@@ -43,8 +47,7 @@ class ChatCompletion:
                 if not data or "[DONE]" in data:
                     continue
                 data_json = json.loads(data)
-                content = data_json['choices'][0]['delta'].get('content')
-                if content:
+                if content := data_json['choices'][0]['delta'].get('content'):
                     yield content
 
 
@@ -52,7 +55,7 @@ class ChatCompletion:
     def random_token(e):
         token = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
         n = len(token)
-        return "".join([token[random.randint(0, n - 1)] for i in range(e)])
+        return "".join([token[random.randint(0, n - 1)] for _ in range(e)])
 
     @staticmethod
     def encrypt(e):
